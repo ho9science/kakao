@@ -9,8 +9,10 @@ from rest_framework import status
 from quickstart.MyApp import MessageClass, KeyboardClass
 from rest_framework.parsers import JSONParser
 
-from konlpy.tag import Kkma
-from .models import Kknouns
+# from konlpy.tag import Mecab
+from .models import Kknouns, Klog
+
+from django.db.models import Q
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -47,7 +49,7 @@ class MessageView(APIView):
         get_arg1 = request.POST.get("arg1",None)
         get_arg2 = request.data
         
-        kkma = Kkma()
+        # mecab = Mecab()
 
         print(get_arg2)
         get_arg1 = get_arg2.get('content')
@@ -56,35 +58,46 @@ class MessageView(APIView):
             result = myClass.do_work()
             response = Response(result, status=status.HTTP_200_OK)
             return response
-        get_arg1 = kkma.nouns(get_arg1)
+        #get_arg1 = mecab.nouns(get_arg1)
+        # local start
+        get_arg1 = ['실력','개발','요구']
+        #local end
         kkma_list=get_arg1
-        return_value = ()
-        temp_id = ()
+        return_value = []
+        temp_id = []
         i = 0
+        query = Q()
         answer = "no answer"
         for keyword in kkma_list:
             if i==0:
-                return_value = Kknouns.objects.values_list('id').filter(indexing__contains=keyword)
+                return_value = Kknouns.objects.values_list('id',flat=True).filter(indexing__contains=keyword)
             else:
-                return_value = Kknouns.objects.values_list('id').filter(id=temp_id,indexing__contains=keyword)
-
+                return_value = Kknouns.objects.values_list('id',flat=True).filter(query, indexing__contains=keyword)
+            print("return:{}".format(return_value))
             if return_value:
                 temp_id=return_value
+                queries = [Q(id=value) for value in return_value]
+                query = queries.pop()
+                for item in queries:
+                    query |= item
+                print("query:{}".format(query))
+
+                
             i=i+1
-        print("kkma:{}".format(return_value))
-        if return_value:
-            print(type(return_value))
-            for gold in return_value:
-                int1 = gold[0]
-                print(type(int1))
-                answer = Kknouns.objects.values_list('answer').filter(id=int1)
+        # print("mecab:{}".format(temp_id))
+        if temp_id:
+            for gold in temp_id:
+                answer1 = Kknouns.objects.values_list('answer').filter(id=gold).first()
+                print(gold)
+                answer = ''.join(str(e) for e in answer1)
                 break
         
-        print(answer)
-                
+        Klog.object.create()
+
         myClass = MessageClass(answer, *args, **kw)
         result = myClass.do_work()
         response = Response(result, status=status.HTTP_200_OK)
+
         return response
 
 class KeyboardView(APIView):
