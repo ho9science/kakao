@@ -25,7 +25,7 @@ SECRET_KEY = '+1v&2yqhh_39o2ttf+7thq9()te6&a3ib^39g%j5714v^**36e'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['54.85.21.154']
+ALLOWED_HOSTS = ['54.85.21.154','127.0.0.1']
 
 
 # Application definition
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'quickstart',
 ]
 
 MIDDLEWARE = [
@@ -76,8 +77,12 @@ WSGI_APPLICATION = 'tutorial.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'kkma',
+        'USER': 'root',
+        'PASSWORD': 'water',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
